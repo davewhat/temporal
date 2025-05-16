@@ -3,6 +3,8 @@ package migration
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/peer"
 	"math"
 	"slices"
 	"sort"
@@ -424,7 +426,9 @@ func (a *activities) ListWorkflows(ctx context.Context, request *workflowservice
 	ctx = headers.SetCallerInfo(ctx, headers.NewCallerInfo(request.Namespace, headers.CallerTypePreemptable, ""))
 	ctx = metadata.NewOutgoingContext(ctx, metadata.Pairs(interceptor.DCRedirectionContextHeaderName, "false"))
 
-	resp, err := a.frontendClient.ListWorkflowExecutions(ctx, request)
+	var p peer.Peer
+	resp, err := a.frontendClient.ListWorkflowExecutions(ctx, request, grpc.Peer(&p))
+	a.logger.Warn(fmt.Sprintf("DWDWDWDW %+v // %+v", p.Addr, p))
 	if err != nil {
 		return nil, err
 	}
